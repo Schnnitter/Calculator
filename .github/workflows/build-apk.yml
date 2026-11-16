@@ -21,13 +21,34 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Decode debug keystore
+      - name: Accept Android SDK licenses
+        shell: bash
         run: |
-          if [ ! -f debug.keystore ] && [ -f debug.keystore.base64 ]; then
-            base64 -d debug.keystore.base64 > debug.keystore
+          set +o pipefail
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          mkdir -p "$SDK_ROOT/licenses"
+          for hash in \
+            8933bad161af4178b1185d1a37fbf41ea5269c55 \
+            d56f5187479451eabf01fb78af6dfcb131a6481e \
+            24333f8a63b6825ea9c5514f83c2829b004d1fee; do
+            grep -qxF "$hash" "$SDK_ROOT/licenses/android-sdk-license" 2>/dev/null || echo "$hash" >> "$SDK_ROOT/licenses/android-sdk-license"
+          done
+          grep -qxF "84831b9409646a918e30573bab4c9c91346d8abd" "$SDK_ROOT/licenses/android-sdk-preview-license" 2>/dev/null || echo "84831b9409646a918e30573bab4c9c91346d8abd" >> "$SDK_ROOT/licenses/android-sdk-preview-license"
+          SDK_MANAGER=$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f 2>/dev/null | head -n 1)
+          if [ -n "$SDK_MANAGER" ]; then
+            yes | "$SDK_MANAGER" --sdk_root="$SDK_ROOT" --licenses >/dev/null 2>&1 || true
+          fi
+
+      - name: Prepare debug keystore
+        run: |
+          if [ ! -f debug.keystore ]; then
+            if [ -f debug.keystore.base64 ]; then
+              base64 -d debug.keystore.base64 > debug.keystore
+            else
+              keytool -genkeypair -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+            fi
           fi
 
       - name: Set up Gradle
@@ -36,7 +57,7 @@ jobs:
           gradle-version: '9.3.1'
 
       - name: Build Debug APK with Gradle
-        run: gradle assembleDebug
+        run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
