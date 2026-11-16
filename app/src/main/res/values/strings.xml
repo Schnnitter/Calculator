@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Калькулятор</string>
+    <string name="nav_standard">Звичайний</string>
+    <string name="nav_fractions">Дроби</string>
+    <string name="nav_scientific">Науковий</string>
+    <string name="nav_currency">Валюти</string>
+    <string name="nav_history">Історія</string>
+    <string name="settings_title">Налаштування</string>
+    <string name="copied_to_clipboard">Скопійовано в буфер обміну</string>
+    <string name="clear_history">Очистити історію</string>
+    <string name="error_division_by_zero">Ділення на нуль неможливе</string>
+    <string name="error_invalid_expression">Некоректний вираз</string>
+    <string name="error_domain">Значення поза областю визначення</string>
+    <string name="error_overflow">Число занадто велике</string>
+</resources>

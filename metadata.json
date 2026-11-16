@@ -1,0 +1,6 @@
+{
+  "name": "Калькулятор",
+  "description": "Сучасний багатофункціональний калькулятор українською мовою зі звичайними дробами, науковими функціями, історією та конвертером валют.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
